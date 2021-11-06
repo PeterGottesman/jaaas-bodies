@@ -16,7 +16,7 @@ LDFLAGS=`pkg-config --libs $(LIBS)` -lpthread
 default: $(EXEC)
 
 $(EXEC): $(BUILD_DIRS) $(OBJS)
-	$(CXX) $(CFLAGS) $(LDFLAGS) -o $@ $(OBJS)
+	$(CXX) $(CFLAGS) -o $@ $(OBJS) $(LDFLAGS)
 
 $(BUILD_DIRS):
 	[ -d "$@" ] || mkdir $@
