@@ -92,9 +92,9 @@ public:
 
         //calculate new x y z position for every point
         for(int i = 0; i < num_points; i++){
-            body->x[i] += body->accelerations[i].aX * delta;
-            body->y[i] += body->accelerations[i].aY * delta;
-            body->z[i] += body->accelerations[i].aZ * delta;
+            body->x[i] += body->velocities[i].Vx * delta;
+            body->y[i] += body->velocities[i].Vy * delta;
+            body->z[i] += body->velocities[i].Vz * delta;
         }
         
     }
@@ -114,7 +114,7 @@ public:
     Simulation(struct bodies * b, float changeInTime, int numPoints)
     {
         body = b;
-        G = .001;
+        G = .01;
         delta = changeInTime;
         num_points = numPoints;
     };
