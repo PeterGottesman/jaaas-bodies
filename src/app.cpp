@@ -176,7 +176,7 @@ void App::init(Simulation *sim)
 
 	glViewport(0, 0, width, height);
 
-	cam = {5, 25, 25};
+	cam = {105, 150, 150};
 	look_dir = glm::normalize(cam * -1.0f);
 
 	this->sim = sim;

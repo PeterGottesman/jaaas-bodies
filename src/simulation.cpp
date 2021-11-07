@@ -104,7 +104,7 @@ void Simulation::calculateVelocities(){
 Simulation::Simulation(struct bodies * b, double changeInTime, int numPoints)
 {
 	body = b;
-	G = 6.6e-9;
+	G = 9e-9;
 	delta = changeInTime;
 	num_points = numPoints;
 
@@ -113,6 +113,8 @@ Simulation::Simulation(struct bodies * b, double changeInTime, int numPoints)
 
 //only function that should be called by graphics
 void Simulation::nextIteration(){
+	for (auto &&f : forces)
+		f = {0};
 	calculateForces();
 	calculateAccelerations();
 	calculateVelocities();
