@@ -2,42 +2,42 @@
 #pragma once
 
 struct bodies{
-    std::vector<float> x;
-    std::vector<float> y;
-    std::vector<float> z;
-    std::vector<float> mass;
+    std::vector<double> x;
+    std::vector<double> y;
+    std::vector<double> z;
+    std::vector<double> mass;
     
     std::vector<struct accelVector> accelerations;
     std::vector<struct velocityVector> velocities;
 };
 
 struct forceVector{
-    float Fx;
-    float Fy;
-    float Fz;
+    double Fx;
+    double Fy;
+    double Fz;
 };
 
 struct accelVector{
-    float aX;
-    float aY;
-    float aZ;
+    double aX;
+    double aY;
+    double aZ;
 };
 
 struct velocityVector{
-    float Vx;
-    float Vy;
-    float Vz;
+    double Vx;
+    double Vy;
+    double Vz;
 };
 
 class Simulation{
     public:
         struct bodies * body;
         std::vector<struct forceVector> forces;
-        float G;
-        float delta;
+        double G;
+        double delta;
         int num_points;
 
-		Simulation(struct bodies * b, float changeInTime, int numPoints);
+		Simulation(struct bodies * b, double changeInTime, int numPoints);
 
 		void calculateForces();
 		struct forceVector getForces(int i, int j);

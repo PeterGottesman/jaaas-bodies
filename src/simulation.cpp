@@ -1,11 +1,9 @@
 #include "simulation.hpp"
 #include <stdlib.h>
+#include <math.h>
 
 void Simulation::calculateForces(){
-
 	//initialize forces to be 0
-	std::vector<struct forceVector> forces(num_points,{0,0,0});
-
 	for(int i = 0; i < num_points; i++){
 		for(int j = i+1; j < num_points; j++){
 			struct forceVector f = getForces(i,j);
@@ -26,27 +24,35 @@ void Simulation::calculateForces(){
 struct forceVector Simulation::getForces(int i, int j){
 	struct forceVector currentForces;
 
-	float x1 = body->x[i];
-	float y1 = body->y[i];
-	float z1 = body->z[i];
-	float mass1 = body->mass[i];
+	double x1 = body->x[i];
+	double y1 = body->y[i];
+	double z1 = body->z[i];
+	double mass1 = body->mass[i];
 
-	float x2 = body->x[j];
-	float y2 = body->y[j];
-	float z2 = body->z[j];
-	float mass2 = body->mass[j];
+	double x2 = body->x[j];
+	double y2 = body->y[j];
+	double z2 = body->z[j];
+	double mass2 = body->mass[j];
 
 	/*Dont have to square root, because square root of distance
 	  cancels out when we do "r^2" in Force equation*/
-	float distanceX = (x2-x1);
-	float distanceY = (y2-y1);
-	float distanceZ = (z2-z1);
+	double distanceX = (x2-x1);
+	double distanceY = (y2-y1);
+	double distanceZ = (z2-z1);
 
-	float totalDistance = (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1);
+	double totalDistance = std::sqrt((x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1));
 
-	float forceX = (G*mass1*mass2*distanceX) / totalDistance;
-	float forceY = (G*mass1*mass2*distanceY) / totalDistance;
-	float forceZ = (G*mass1*mass2*distanceZ) / totalDistance;
+	double forceX = (G*mass1*mass2*distanceX) / (totalDistance * totalDistance * totalDistance);
+	double forceY = (G*mass1*mass2*distanceY) / (totalDistance * totalDistance * totalDistance);
+	double forceZ = (G*mass1*mass2*distanceZ) / (totalDistance * totalDistance * totalDistance);
+
+	if (totalDistance < 1)
+	{
+		forceX = forceY = forceZ = 0;
+		forces[i] = forces[j] = {0};
+		body->velocities[i] = body->velocities[j] = {0};
+		body->accelerations[i] = body->accelerations[j] = {0};
+	}
 
 	currentForces.Fx = forceX;
 	currentForces.Fy = forceY;
@@ -60,11 +66,11 @@ void Simulation::calculateAccelerations(){
 
 	//calculate x y z acceleration for all points
 	for(int i = 0; i < num_points; i++){
-		float mass = body->mass[i];
+		double mass = body->mass[i];
 
-		float accelX = forces[i].Fx/mass;
-		float accelY = forces[i].Fy/mass;
-		float accelZ = forces[i].Fz/mass;
+		double accelX = forces[i].Fx/mass;
+		double accelY = forces[i].Fy/mass;
+		double accelZ = forces[i].Fz/mass;
 
 		body->accelerations[i].aX = accelX;
 		body->accelerations[i].aY = accelY;
@@ -95,12 +101,14 @@ void Simulation::calculateVelocities(){
 	}
 }
 
-Simulation::Simulation(struct bodies * b, float changeInTime, int numPoints)
+Simulation::Simulation(struct bodies * b, double changeInTime, int numPoints)
 {
 	body = b;
-	G = .01;
+	G = 6.6e-9;
 	delta = changeInTime;
 	num_points = numPoints;
+
+	forces.resize(num_points);
 };
 
 //only function that should be called by graphics

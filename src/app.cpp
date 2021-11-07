@@ -22,7 +22,6 @@ App *App::get_instance()
 	if (singleton == nullptr)
 	{
 		singleton = new App();
-		singleton->init();
 	}
 
 	return singleton;
@@ -93,21 +92,12 @@ void App::run()
 {
 	int res_loc;
 
-	std::vector<glm::fvec3> positions;
+	// std::vector<glm::fvec3> positions;
 	std::vector<Planet> planets;
 
-	for (int i = 0; i < 5; ++i)
+	for (int i = 0; i < sim->num_points; ++i)
 	{
-		std::random_device rng;
-		std::uniform_real_distribution<float> rad_dist(0, 2);
-		planets.push_back({rad_dist(rng)});
-
-		std::uniform_real_distribution<float> pos_dist(-5, 5);
-		positions.push_back({
-				pos_dist(rng),
-				pos_dist(rng),
-				pos_dist(rng),
-			});
+		planets.push_back(std::log10(std::log(sim->body->mass[i])));
 	}
 
 	struct program *prog = loadShaders();
@@ -115,7 +105,7 @@ void App::run()
 	res_loc = glGetUniformLocation(prog->program_id, "uResolution");
 	glUniform2f(res_loc, width, height);
 
-	glm::mat4 proj = glm::perspective(glm::radians(45.0), 4.0/3.0, 0.1, 100.0);
+	glm::mat4 proj = glm::perspective(glm::radians(45.0), 4.0/3.0, 0.1, 10000.0);
 	glm::mat4 model;
 	glm::mat4 view;
 
@@ -127,7 +117,8 @@ void App::run()
 	float t = 0.0;
 	while (!glfwWindowShouldClose(win))
 	{
-		glClearColor(0.05, 0, 0.2, 1);
+		sim->nextIteration();
+		glClearColor(0.05, 0, 0.2, 0.1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		view = glm::lookAt(
@@ -142,7 +133,12 @@ void App::run()
 
 		for (long i = 0; i < planets.size(); ++i)
 		{
-			model = glm::translate(glm::mat4(1.0f), positions[i]);
+			glm::fvec3 pos = {
+				sim->body->x[i],
+				sim->body->y[i],
+				sim->body->z[i],
+			};
+			model = glm::translate(glm::mat4(1.0f), pos);
 			res_loc = glGetUniformLocation(prog->program_id, "model");
 			glUniformMatrix4fv(res_loc, 1, GL_FALSE, &model[0][0]);
 			planets[i].draw();
@@ -157,7 +153,7 @@ void App::run()
 	glfwDestroyWindow(win);
 }
 
-void App::init()
+void App::init(Simulation *sim)
 {
 	glfwInit();
 
@@ -180,6 +176,8 @@ void App::init()
 
 	glViewport(0, 0, width, height);
 
-	cam = {15, 15, 15};
+	cam = {5, 25, 25};
 	look_dir = glm::normalize(cam * -1.0f);
+
+	this->sim = sim;
 }

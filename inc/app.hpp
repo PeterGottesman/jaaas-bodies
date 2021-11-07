@@ -7,10 +7,14 @@
 #include <glm/gtx/rotate_vector.hpp>
 #include <GLFW/glfw3.h>
 
+#include "simulation.hpp"
+
 class App
 {
 private:
 	GLFWwindow *win;
+	Simulation *sim;
+
 	int width, height;
 
 	glm::vec3 cam;
@@ -20,7 +24,7 @@ private:
 
 public:
 	App() {}
-	void init(void);
+	void init(Simulation *sim);
 	void run(void);
 	void move_cam(glm::fvec3 dir);
 	void rotate_cam(glm::fvec3 axis);
