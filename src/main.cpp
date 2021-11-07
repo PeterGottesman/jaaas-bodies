@@ -12,8 +12,8 @@ int main(int argc, char *argv[])
 	testBodies.y = {0,5};
 	testBodies.z = {0,0};
 	testBodies.mass = {50,10};
-	testBodies.accelerations{ {0,0,0}, {0,0,0} };
-	testBodies.velocities{ {0,0,0}, {2,3,0} };
+	testBodies.accelerations = { {0,0,0}, {0,0,0} };
+	testBodies.velocities = { {0,0,0}, {2,3,0} };
 ;
 	App *a = App::get_instance();
 	a->run();
