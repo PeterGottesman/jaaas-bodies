@@ -1,6 +1,7 @@
 #include <iostream>
 #include "app.hpp"
 #include "planet.hpp"
+#include <glm/gtc/noise.hpp>
 
 Planet::Planet(float radius) : radius(radius)
 {
@@ -63,9 +64,21 @@ void Planet::init_mesh()
 	norms.clear();
 
 	// Generate colors/norms
-	for (auto v : verts)
+	for (auto&& v : verts)
 	{
-		colors.push_back(v);
+		glm::fvec3 noise = {
+			glm::simplex(2.0f*v) * 0.05 +
+			glm::simplex(v) * 0.15,
+
+			glm::simplex(v) * 0.15 +
+			glm::simplex(2.0f * v) * 0.05,
+
+			glm::simplex(2.0f * v) * 0.09,
+		};
+
+		colors.push_back(glm::fvec3({0.7, 0.5, 0.3}) + noise * 0.5f);
+
+		v += noise;
 		norms.push_back(glm::normalize(v));
 	}
 
@@ -82,10 +95,10 @@ void Planet::init_mesh()
 	glBufferData(GL_ARRAY_BUFFER, sizeof(colors[0]) * colors.size(), &colors[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	// glEnableVertexAttribArray(2);
-	// glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
-	// glBufferData(GL_ARRAY_BUFFER, sizeof(norms[0]) * norms.size(), &norms, GL_STATIC_DRAW);
-	// glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
+	glEnableVertexAttribArray(2);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(norms[0]) * norms.size(), &norms[0], GL_STATIC_DRAW);
+	glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
 void Planet::draw(void)

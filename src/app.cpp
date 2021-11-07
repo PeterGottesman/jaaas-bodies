@@ -102,9 +102,6 @@ void App::run()
 
 	struct program *prog = loadShaders();
 
-	res_loc = glGetUniformLocation(prog->program_id, "uResolution");
-	glUniform2f(res_loc, width, height);
-
 	glm::mat4 proj = glm::perspective(glm::radians(45.0), 4.0/3.0, 0.1, 10000.0);
 	glm::mat4 model;
 	glm::mat4 view;
@@ -127,6 +124,9 @@ void App::run()
 			glm::vec3(0,1,0)  // up
 			);
 
+
+		res_loc = glGetUniformLocation(prog->program_id, "cam_dir");
+		glUniform3f(res_loc, look_dir.x, look_dir.y, look_dir.z);
 
 		res_loc = glGetUniformLocation(prog->program_id, "view");
 		glUniformMatrix4fv(res_loc, 1, GL_FALSE, &view[0][0]);

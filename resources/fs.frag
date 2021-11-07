@@ -1,12 +1,13 @@
 #version 330 core
 
-uniform vec2 uResolution;
+uniform vec3 cam_dir;
+
 in vec3 fc;
+in vec3 norm;
 
 out vec4 FragColor;
 
 void main()
 {
-	// vec2 iCoord = gl_FragCoord.xy/uResolution;
-	FragColor = vec4(fc, 0.0);
+	FragColor = vec4(fc, 0.0) * dot(cam_dir, -norm);
 }
