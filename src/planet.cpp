@@ -2,36 +2,12 @@
 #include "app.hpp"
 #include "planet.hpp"
 
-void Planet::subdivide()
-{
-	std::vector<glm::uvec3> tmptris;
-
-	for (auto t : tris)
-	{
-		// for each triangle, split into four tris
-		verts.push_back(glm::normalize(verts[t.x] + verts[t.y]));
-		verts.push_back(glm::normalize(verts[t.y] + verts[t.z]));
-		verts.push_back(glm::normalize(verts[t.x] + verts[t.z]));
-		unsigned int m2 = verts.size()-1;
-		unsigned int m1 = m2-1;
-		unsigned int m0 = m1-1;
-
-
-		tmptris.push_back({t.x, m0, m2});
-		tmptris.push_back({m0, t.y, m1});
-		tmptris.push_back({m2, m1, t.z});
-		tmptris.push_back({m0, m1, m2});
-	}
-
-	tris = tmptris;
-}
-
 Planet::Planet(float radius) : radius(radius)
 {
-	// Stolen shamelessly from
+	// Initial verts/tris shamelessly stolen from
 	// https://schneide.blog/2016/07/15/generating-an-icosphere-in-c/
-	const float X=.525731112119133606f;
-	const float Z=.850650808352039932f;
+	const float X=.525731112119133606f * radius;
+	const float Z=.850650808352039932f * radius;
 	const float N=0.f;
 
 	verts = {
@@ -55,6 +31,29 @@ Planet::Planet(float radius) : radius(radius)
 		subdivide();
 
 	init_mesh();
+}
+
+void Planet::subdivide()
+{
+	std::vector<glm::uvec3> tmptris;
+
+	for (auto t : tris)
+	{
+		// for each triangle, split into four tris
+		verts.push_back(glm::normalize(verts[t.x] + verts[t.y]) * radius);
+		verts.push_back(glm::normalize(verts[t.y] + verts[t.z]) * radius);
+		verts.push_back(glm::normalize(verts[t.x] + verts[t.z]) * radius);
+		unsigned int m2 = verts.size()-1;
+		unsigned int m1 = m2-1;
+		unsigned int m0 = m1-1;
+
+		tmptris.push_back({t.x, m0, m2});
+		tmptris.push_back({m0, t.y, m1});
+		tmptris.push_back({m2, m1, t.z});
+		tmptris.push_back({m0, m1, m2});
+	}
+
+	tris = tmptris;
 }
 
 void Planet::init_mesh()
@@ -91,5 +90,6 @@ void Planet::init_mesh()
 
 void Planet::draw(void)
 {
+	glBindVertexArray(vao);
 	glDrawElements(GL_TRIANGLES, tris.size() * tris[0].length(), GL_UNSIGNED_INT, 0);
 }
