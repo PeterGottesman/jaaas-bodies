@@ -6,8 +6,7 @@
 
 int main(int argc, char *argv[])
 {
-	App a;
-	a.init();
-	a.run();
+	App *a = App::get_instance();
+	a->run();
 }
 

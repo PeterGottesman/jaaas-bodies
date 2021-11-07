@@ -1,3 +1,5 @@
+#include <random>
+
 #include "app.hpp"
 #include "shader.hpp"
 #include "planet.hpp"
@@ -13,51 +15,112 @@ static struct program *loadShaders()
 	return prog;
 }
 
-static void keyhandler(GLFWwindow *win, int key, int scancode, int action, int mods)
+App *App::singleton = nullptr;
+
+App *App::get_instance()
 {
+	if (singleton == nullptr)
+	{
+		singleton = new App();
+		singleton->init();
+	}
+
+	return singleton;
+}
+
+void App::keyhandler(GLFWwindow *win, int key, int scancode, int action, int mods)
+{
+	if (action == GLFW_RELEASE)
+		return;
+
+	App *a = App::get_instance();
 	switch (key)
 	{
-		case GLFW_KEY_Q:
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(win, GLFW_TRUE);
 			break;
-		case GLFW_KEY_R:
-			// reload shaders
+		case GLFW_KEY_Q:
+			a->rotate_cam({0, 1, 0});
+			break;
+		case GLFW_KEY_E:
+			a->rotate_cam({0, -1, 0});
+			break;
+		case GLFW_KEY_W:
+			a->move_cam({0, 0, 1});
+			break;
+		case GLFW_KEY_A:
+			a->move_cam({-1, 0, 0});
+			break;
+		case GLFW_KEY_S:
+			a->move_cam({0, 0, -1});
+			break;
+		case GLFW_KEY_D:
+			a->move_cam({1, 0, 0});
+			break;
+		case GLFW_KEY_LEFT_CONTROL:
+			a->move_cam({0, -1, 0});
+			break;
+		case GLFW_KEY_SPACE:
+			a->move_cam({0, 1, 0});
 			break;
 		default:
 			break;
 	}
 }
 
-App::App() {}
+void App::move_cam(glm::fvec3 dir)
+{
+	if (dir.z != 0)
+	{
+		cam += look_dir * dir.z;
+	}
+	else if (dir.x != 0)
+	{
+		cam += glm::cross({0.0f, 1.0f, 0.0f}, look_dir) * dir.x;
+	}
+	else if (dir.y != 0)
+	{
+		cam += dir;
+	}
+}
+
+void App::rotate_cam(glm::fvec3 axis)
+{
+	look_dir = glm::rotate(look_dir, glm::radians(5.0f), axis);
+}
 
 void App::run()
 {
 	int res_loc;
 
-	Planet p(0.5);
+	std::vector<glm::fvec3> positions;
+	std::vector<Planet> planets;
+
+	for (int i = 0; i < 5; ++i)
+	{
+		std::random_device rng;
+		std::uniform_real_distribution<float> rad_dist(0, 2);
+		planets.push_back({rad_dist(rng)});
+
+		std::uniform_real_distribution<float> pos_dist(-5, 5);
+		positions.push_back({
+				pos_dist(rng),
+				pos_dist(rng),
+				pos_dist(rng),
+			});
+	}
 
 	struct program *prog = loadShaders();
 
 	res_loc = glGetUniformLocation(prog->program_id, "uResolution");
 	glUniform2f(res_loc, width, height);
 
-	glm::mat4 proj = glm::perspective(glm::radians(45.0), 4.0/3.0, 0.1, 10.0);
+	glm::mat4 proj = glm::perspective(glm::radians(45.0), 4.0/3.0, 0.1, 100.0);
+	glm::mat4 model;
+	glm::mat4 view;
 
-	glm::mat4 view = glm::lookAt(
-		glm::vec3(4,0,3), // Camera is at (4,3,3), in World Space
-		glm::vec3(0,0,0), // and looks at the origin
-		glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
-		);
-
-	glm::mat4 model = glm::mat4(1.0f);
-
-	res_loc = glGetUniformLocation(prog->program_id, "model");
-	glUniformMatrix4fv(res_loc, 1, GL_FALSE, &model[0][0]);
 	res_loc = glGetUniformLocation(prog->program_id, "proj");
 	glUniformMatrix4fv(res_loc, 1, GL_FALSE, &proj[0][0]);
-	res_loc = glGetUniformLocation(prog->program_id, "view");
-	glUniformMatrix4fv(res_loc, 1, GL_FALSE, &view[0][0]);
 
 	glEnable(GL_DEPTH_TEST);
 
@@ -67,23 +130,28 @@ void App::run()
 		glClearColor(0.05, 0, 0.2, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		glm::mat4 view = glm::lookAt(
-			glm::vec3(4*cos(t),3,4*sin(t)), // camera
-			glm::vec3(0,0,0), // lookat
+		view = glm::lookAt(
+			cam,
+			cam + look_dir,
 			glm::vec3(0,1,0)  // up
 			);
+
 
 		res_loc = glGetUniformLocation(prog->program_id, "view");
 		glUniformMatrix4fv(res_loc, 1, GL_FALSE, &view[0][0]);
 
-		// glDrawArrays(GL_TRIANGLES, 0, 3);
-		p.draw();
-		// glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
+		for (long i = 0; i < planets.size(); ++i)
+		{
+			model = glm::translate(glm::mat4(1.0f), positions[i]);
+			res_loc = glGetUniformLocation(prog->program_id, "model");
+			glUniformMatrix4fv(res_loc, 1, GL_FALSE, &model[0][0]);
+			planets[i].draw();
+		}
 
 		glfwPollEvents();
 		glfwSwapBuffers(win);
 
-		t += 0.05;
+		t += 0.01;
 	}
 
 	glfwDestroyWindow(win);
@@ -112,4 +180,6 @@ void App::init()
 
 	glViewport(0, 0, width, height);
 
+	cam = {15, 15, 15};
+	look_dir = glm::normalize(cam * -1.0f);
 }
