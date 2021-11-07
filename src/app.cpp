@@ -1,5 +1,6 @@
 #include "app.hpp"
 #include "shader.hpp"
+#include "planet.hpp"
 
 static struct program *loadShaders()
 {
@@ -33,21 +34,56 @@ App::App() {}
 void App::run()
 {
 	int res_loc;
+
+	Planet p(0.5);
+
 	struct program *prog = loadShaders();
 
 	res_loc = glGetUniformLocation(prog->program_id, "uResolution");
 	glUniform2f(res_loc, width, height);
 
+	glm::mat4 proj = glm::perspective(glm::radians(45.0), 4.0/3.0, 0.1, 10.0);
+
+	glm::mat4 view = glm::lookAt(
+		glm::vec3(4,0,3), // Camera is at (4,3,3), in World Space
+		glm::vec3(0,0,0), // and looks at the origin
+		glm::vec3(0,1,0)  // Head is up (set to 0,-1,0 to look upside-down)
+		);
+
+	glm::mat4 model = glm::mat4(1.0f);
+
+	res_loc = glGetUniformLocation(prog->program_id, "model");
+	glUniformMatrix4fv(res_loc, 1, GL_FALSE, &model[0][0]);
+	res_loc = glGetUniformLocation(prog->program_id, "proj");
+	glUniformMatrix4fv(res_loc, 1, GL_FALSE, &proj[0][0]);
+	res_loc = glGetUniformLocation(prog->program_id, "view");
+	glUniformMatrix4fv(res_loc, 1, GL_FALSE, &view[0][0]);
+
+	glEnable(GL_DEPTH_TEST);
+
+	float t = 0.0;
 	while (!glfwWindowShouldClose(win))
 	{
 		glClearColor(0.05, 0, 0.2, 1);
-		glClear(GL_COLOR_BUFFER_BIT);
+		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		/* glDrawArrays(GL_TRIANGLES, 0, 3); */
-		glDrawElements(GL_TRIANGLES, 6, GL_UNSIGNED_INT, 0);
+		glm::mat4 view = glm::lookAt(
+			glm::vec3(4,3,3), // camera
+			glm::vec3(0,0,0), // lookat
+			glm::vec3(0,1,0)  // up
+			);
+
+		res_loc = glGetUniformLocation(prog->program_id, "view");
+		glUniformMatrix4fv(res_loc, 1, GL_FALSE, &view[0][0]);
+
+		// glDrawArrays(GL_TRIANGLES, 0, 3);
+		p.draw();
+		// glDrawElements(GL_TRIANGLES, 12, GL_UNSIGNED_INT, 0);
 
 		glfwPollEvents();
 		glfwSwapBuffers(win);
+
+		t += 0.01;
 	}
 
 	glfwDestroyWindow(win);
@@ -55,18 +91,6 @@ void App::run()
 
 void App::init()
 {
-	unsigned int vert_buf, elem_buf;
-	float verts[] = {
-		-1.0f, 1.0f,
-		-1.0f, -1.0f,
-		1.0f, 1.0f,
-		1.0f, -1.0f,
-	};
-	unsigned int tris[] = {
-		0, 1, 2,
-		2, 1, 3
-	};
-
 	glfwInit();
 
 	width = height = 400;
@@ -88,16 +112,4 @@ void App::init()
 
 	glViewport(0, 0, width, height);
 
-	/* Generate and bind VAO */
-	glGenVertexArrays(1, &vert_buf);
-	glBindVertexArray(vert_buf);
-
-	glBindBuffer(GL_ARRAY_BUFFER, vert_buf);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(verts), verts, GL_STATIC_DRAW);
-	glVertexAttribPointer(0, 2, GL_FLOAT, GL_FALSE, 0, 0);
-	glEnableVertexAttribArray(0);
-
-	glGenBuffers(1, &elem_buf);
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, elem_buf);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(tris), tris, GL_STATIC_DRAW);
 }
