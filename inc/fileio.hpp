@@ -1,5 +1,7 @@
+#pragma once
 #include <stdio.h>
 #include <stdlib.h>
+#include <string>
 
 /**
  * load_file
@@ -8,12 +10,12 @@
  * of loaded file. This buffer should be freed by the caller.
  * 
  */
-static char *load_file(char *filename, int *length)
+static char *load_file(std::string filename, int *length)
 {
 	FILE *f;
 	char *output;
 
-	f = fopen(filename, "r");
+	f = fopen(filename.c_str(), "r");
 	if (f == NULL)
 	{
 		perror("load_file");

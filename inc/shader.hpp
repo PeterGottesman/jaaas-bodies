@@ -1,4 +1,5 @@
 #pragma once
+#include <string>
 
 /* struct shader; */
 /* struct program; */
@@ -26,7 +27,7 @@ struct program {
 };
 
 
-struct shader *shader_load(char *filename, enum shader_type);
+struct shader *shader_load(std::string filename, enum shader_type);
 /* int shader_attach(struct shader *shader, struct program *program); */
 void shader_unload(struct shader *shader);
 

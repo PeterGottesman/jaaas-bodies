@@ -27,7 +27,7 @@ static inline int type2gl(enum shader_type type)
 	}
 }
 
-struct shader *shader_load(char *filename, enum shader_type type)
+struct shader *shader_load(std::string filename, enum shader_type type)
 {
 	struct shader *shader;
 	char infoLog[512];
@@ -36,9 +36,9 @@ struct shader *shader_load(char *filename, enum shader_type type)
 	int success;
 
 	source = load_file(filename, &s_len);
-	if (source == NULL)
+	if (source == nullptr)
 	{
-		return NULL;
+		return nullptr;
 	}
 
 	s_id = glCreateShader(type2gl(type));
@@ -50,7 +50,7 @@ struct shader *shader_load(char *filename, enum shader_type type)
 	if(!success)
 	{
 		glGetShaderInfoLog(s_id, 512, NULL, infoLog);
-		printf("Error compiling shader %s:\n %s\n", filename, infoLog);
+		printf("Error compiling shader %s:\n %s\n", filename.c_str(), infoLog);
 		return NULL;
 	}
 
@@ -58,7 +58,7 @@ struct shader *shader_load(char *filename, enum shader_type type)
 	shader = new struct shader();
 	shader->type = type;
 	shader->shader_id = s_id;
-	shader->filename = strdup(filename);
+	shader->filename = strdup(filename.c_str());
 
 	return shader;
 }
