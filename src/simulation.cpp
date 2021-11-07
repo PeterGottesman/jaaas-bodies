@@ -5,7 +5,15 @@
 void Simulation::calculateForces(){
 	//initialize forces to be 0
 	for(int i = 0; i < num_points; i++){
+
+		if (body->unmoving[i] == true)
+			return;
+
 		for(int j = i+1; j < num_points; j++){
+
+			if (body->unmoving[j] == true)
+				break;
+
 			struct forceVector f = getForces(i,j);
 
 			forces[i].Fx += f.Fx;
@@ -46,13 +54,13 @@ struct forceVector Simulation::getForces(int i, int j){
 	double forceY = (G*mass1*mass2*distanceY) / (totalDistance * totalDistance * totalDistance);
 	double forceZ = (G*mass1*mass2*distanceZ) / (totalDistance * totalDistance * totalDistance);
 
-	if (totalDistance < 1)
-	{
-		forceX = forceY = forceZ = 0;
-		forces[i] = forces[j] = {0};
-		body->velocities[i] = body->velocities[j] = {0};
-		body->accelerations[i] = body->accelerations[j] = {0};
-	}
+	// if (totalDistance < 1)
+	// {
+	// 	forceX = forceY = forceZ = 0;
+	// 	forces[i] = forces[j] = {0};
+	// 	body->velocities[i] = body->velocities[j] = {0};
+	// 	body->accelerations[i] = body->accelerations[j] = {0};
+	// }
 
 	currentForces.Fx = forceX;
 	currentForces.Fy = forceY;
@@ -62,43 +70,32 @@ struct forceVector Simulation::getForces(int i, int j){
 }
 
 //Should only be called after calculateForces is called
-void Simulation::calculateAccelerations(){
+void Simulation::calculateAccelerations(int i){
+	double mass = body->mass[i];
 
-	//calculate x y z acceleration for all points
-	for(int i = 0; i < num_points; i++){
-		double mass = body->mass[i];
+	double accelX = forces[i].Fx/mass;
+	double accelY = forces[i].Fy/mass;
+	double accelZ = forces[i].Fz/mass;
 
-		double accelX = forces[i].Fx/mass;
-		double accelY = forces[i].Fy/mass;
-		double accelZ = forces[i].Fz/mass;
-
-		body->accelerations[i].aX = accelX;
-		body->accelerations[i].aY = accelY;
-		body->accelerations[i].aZ = accelZ;
-	}
-
+	body->accelerations[i].aX = accelX;
+	body->accelerations[i].aY = accelY;
+	body->accelerations[i].aZ = accelZ;
 }
 
 //should be called last
-void Simulation::calculatePosition(){
+void Simulation::calculatePosition(int i){
 
 	//calculate new x y z position for every point
-	for(int i = 0; i < num_points; i++){
-		body->x[i] += body->velocities[i].Vx * delta;
-		body->y[i] += body->velocities[i].Vy * delta;
-		body->z[i] += body->velocities[i].Vz * delta;
-	}
+	body->x[i] += body->velocities[i].Vx * delta;
+	body->y[i] += body->velocities[i].Vy * delta;
+	body->z[i] += body->velocities[i].Vz * delta;
 }
 
 //should only be called after getAcceleration
-void Simulation::calculateVelocities(){
-
-	//calculate x y z velocities for all points
-	for(int i = 0; i < num_points; i++){
+void Simulation::calculateVelocities(int i){
 		body->velocities[i].Vx += body->accelerations[i].aX * delta;
 		body->velocities[i].Vy += body->accelerations[i].aY * delta;
 		body->velocities[i].Vz += body->accelerations[i].aZ * delta;
-	}
 }
 
 Simulation::Simulation(struct bodies * b, double changeInTime, int numPoints)
@@ -115,8 +112,16 @@ Simulation::Simulation(struct bodies * b, double changeInTime, int numPoints)
 void Simulation::nextIteration(){
 	for (auto &&f : forces)
 		f = {0};
+
 	calculateForces();
-	calculateAccelerations();
-	calculateVelocities();
-	calculatePosition();
+
+	for (int i = 0; i < num_points; ++i)
+	{
+		if (body->unmoving[i] == true)
+			return;
+
+		calculateAccelerations(i);
+		calculateVelocities(i);
+		calculatePosition(i);
+	}
 }

@@ -23,12 +23,38 @@ int main(int argc, char *argv[])
 	std::normal_distribution<float> vel_dist(0, 2);
 	rng.seed(dev());
 
-	for (int i = 0; i < 3; ++i)
+	for (int i = 0; i < 5; ++i)
 	{
 		testBodies.x.push_back(pos_dist(rng));
 		testBodies.y.push_back(pos_dist(rng) * 0.75);
 		testBodies.z.push_back(pos_dist(rng));
+
+		double mass = mass_dist(rng);
 		testBodies.mass.push_back(mass_dist(rng));
+		testBodies.radius.push_back(std::log(std::log(mass)));
+		testBodies.unmoving.push_back(false);
+		testBodies.accelerations.push_back({
+				vel_dist(rng),
+				vel_dist(rng),
+				vel_dist(rng),
+			});
+		testBodies.velocities.push_back({
+				vel_dist(rng),
+				vel_dist(rng)*0.5,
+				vel_dist(rng),
+			});
+	}
+
+	for (int i = 0; i < 9000; ++i)
+	{
+		testBodies.x.push_back(pos_dist(rng) * 100);
+		testBodies.y.push_back(pos_dist(rng) * 75);
+		testBodies.z.push_back(pos_dist(rng) * 100);
+
+		double mass = mass_dist(rng);
+		testBodies.mass.push_back(mass_dist(rng) * 100);
+		testBodies.radius.push_back(std::log(mass));
+		testBodies.unmoving.push_back(true);
 		testBodies.accelerations.push_back({
 				vel_dist(rng),
 				vel_dist(rng),

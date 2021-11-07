@@ -9,6 +9,9 @@ struct bodies{
     
     std::vector<struct accelVector> accelerations;
     std::vector<struct velocityVector> velocities;
+
+	std::vector<double> radius;
+	std::vector<bool> unmoving;
 };
 
 struct forceVector{
@@ -41,8 +44,8 @@ class Simulation{
 
 		void calculateForces();
 		struct forceVector getForces(int i, int j);
-        void calculateAccelerations();
-        void calculatePosition();
-        void calculateVelocities();
+        void calculateAccelerations(int i);
+        void calculatePosition(int i);
+        void calculateVelocities(int i);
         void nextIteration();
 };

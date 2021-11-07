@@ -38,12 +38,21 @@ void App::keyhandler(GLFWwindow *win, int key, int scancode, int action, int mod
 		case GLFW_KEY_ESCAPE:
 			glfwSetWindowShouldClose(win, GLFW_TRUE);
 			break;
+
+		case GLFW_KEY_R:
+			a->rotate_cam({1, 0, 0});
+			break;
+		case GLFW_KEY_F:
+			a->rotate_cam({-1, 0, 0});
+			break;
+
 		case GLFW_KEY_Q:
 			a->rotate_cam({0, 1, 0});
 			break;
 		case GLFW_KEY_E:
 			a->rotate_cam({0, -1, 0});
 			break;
+
 		case GLFW_KEY_W:
 			a->move_cam({0, 0, 1});
 			break;
@@ -56,10 +65,11 @@ void App::keyhandler(GLFWwindow *win, int key, int scancode, int action, int mod
 		case GLFW_KEY_D:
 			a->move_cam({1, 0, 0});
 			break;
-		case GLFW_KEY_LEFT_CONTROL:
+
+		case GLFW_KEY_G:
 			a->move_cam({0, -1, 0});
 			break;
-		case GLFW_KEY_SPACE:
+		case GLFW_KEY_T:
 			a->move_cam({0, 1, 0});
 			break;
 		default:
@@ -85,7 +95,7 @@ void App::move_cam(glm::fvec3 dir)
 
 void App::rotate_cam(glm::fvec3 axis)
 {
-	look_dir = glm::rotate(look_dir, glm::radians(5.0f), axis);
+	look_dir = glm::rotate(look_dir, glm::radians(1.0f), axis);
 }
 
 void App::run()
@@ -115,7 +125,7 @@ void App::run()
 	while (!glfwWindowShouldClose(win))
 	{
 		sim->nextIteration();
-		glClearColor(0.05, 0, 0.2, 0.1);
+		glClearColor(0.05, 0, 0.1, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		cam += glm::fvec3{0.0010f, 0.0005f, 0.0f};
