@@ -37,8 +37,10 @@ class Simulation{
         float delta;
         int num_points;
 
-        void calculateForces();
-        struct forceVector getForces(int i, int j);
+		Simulation(struct bodies * b, float changeInTime, int numPoints);
+
+		void calculateForces();
+		struct forceVector getForces(int i, int j);
         void calculateAccelerations();
         void calculatePosition();
         void calculateVelocities();
