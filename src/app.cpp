@@ -76,7 +76,7 @@ void App::move_cam(glm::fvec3 dir)
 	}
 	else if (dir.x != 0)
 	{
-		cam += glm::cross({0.0f, 1.0f, 0.0f}, look_dir) * dir.x;
+		cam += glm::cross(look_dir, {0.0f, 1.0f, 0.0f}) * dir.x;
 	}
 	else if (dir.y != 0)
 	{
