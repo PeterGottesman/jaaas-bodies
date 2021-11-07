@@ -49,13 +49,15 @@ public:
 
         /*Dont have to square root, because square root of distance
         cancels out when we do "r^2" in Force equation*/
-        float distanceX = (x2-x1)*(x2-x1);
-        float distanceY = (y2-y1)*(y2-y1);
-        float distanceZ = (z2-z1)*(z2-z1);
+        float distanceX = (x2-x1);
+        float distanceY = (y2-y1);
+        float distanceZ = (z2-z1);
 
-        float forceX = (G*mass1*mass2)/distanceX;
-        float forceY = (G*mass1*mass2)/distanceY;
-        float forceZ = (G*mass1*mass2)/distanceZ;
+        float totalDistance = (x2-x1)*(x2-x1) + (y2-y1)*(y2-y1) + (z2-z1)*(z2-z1);
+
+        float forceX = (G*mass1*mass2*distanceX) / (totalDistance * totalDistance * totalDistance);
+        float forceY = (G*mass1*mass2*distanceY) / (totalDistance * totalDistance * totalDistance);
+        float forceZ = (G*mass1*mass2*distanceZ) / (totalDistance * totalDistance * totalDistance);
 
         currentForces.Fx = forceX;
         currentForces.Fy = forceY;

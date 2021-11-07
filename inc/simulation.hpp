@@ -28,3 +28,19 @@ struct velocityVector{
     float Vy;
     float Vz;
 };
+
+class Simulation{
+    public:
+        struct bodies * body;
+        std::vector<struct forceVector> forces;
+        float G;
+        float delta;
+        int num_points;
+
+        void calculateForces();
+        struct forceVector getForces(int i, int j);
+        void calculateAccelerations();
+        void calculatePosition();
+        void calculateVelocities();
+        void nextIteration();
+};
