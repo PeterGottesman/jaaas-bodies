@@ -97,7 +97,7 @@ void App::run()
 
 	for (int i = 0; i < sim->num_points; ++i)
 	{
-		planets.push_back(std::log10(std::log(sim->body->mass[i])));
+		planets.push_back(std::log(std::log(sim->body->mass[i])));
 	}
 
 	struct program *prog = loadShaders();
@@ -117,6 +117,8 @@ void App::run()
 		sim->nextIteration();
 		glClearColor(0.05, 0, 0.2, 0.1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
+
+		cam += glm::fvec3{0.0010f, 0.0005f, 0.0f};
 
 		view = glm::lookAt(
 			cam,
@@ -176,7 +178,7 @@ void App::init(Simulation *sim)
 
 	glViewport(0, 0, width, height);
 
-	cam = {105, 150, 150};
+	cam = {105, 120, 150};
 	look_dir = glm::normalize(cam * -1.0f);
 
 	this->sim = sim;

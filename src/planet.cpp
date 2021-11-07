@@ -70,10 +70,10 @@ void Planet::init_mesh()
 			glm::simplex(2.0f*v) * 0.05 +
 			glm::simplex(v) * 0.15,
 
-			glm::simplex(v) * 0.15 +
-			glm::simplex(2.0f * v) * 0.05,
-
 			glm::simplex(2.0f * v) * 0.09,
+
+			glm::simplex(v) * 0.25 +
+			glm::simplex(2.0f * v) * 0.05,
 		};
 
 		colors.push_back(glm::fvec3({0.7, 0.5, 0.3}) + noise * 0.5f);
