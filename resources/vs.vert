@@ -14,6 +14,6 @@ void main()
 {
 	gl_Position = proj * view * model * vec4(aPos, 1.0);
 
-	norm = normal;
+	norm = (model * vec4(normal, 0.0)).xyz;
 	fc = color;
 }

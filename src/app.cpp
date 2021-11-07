@@ -107,7 +107,10 @@ void App::run()
 
 	for (int i = 0; i < sim->num_points; ++i)
 	{
-		planets.push_back(std::log(std::log(sim->body->mass[i])));
+		planets.push_back({
+				sim->body->unmoving[i],
+				(float)sim->body->radius[i]
+			});
 	}
 
 	struct program *prog = loadShaders();
@@ -143,7 +146,7 @@ void App::run()
 		res_loc = glGetUniformLocation(prog->program_id, "view");
 		glUniformMatrix4fv(res_loc, 1, GL_FALSE, &view[0][0]);
 
-		for (long i = 0; i < planets.size(); ++i)
+		for (unsigned long i = 0; i < planets.size(); ++i)
 		{
 			glm::fvec3 pos = {
 				sim->body->x[i],
@@ -151,6 +154,7 @@ void App::run()
 				sim->body->z[i],
 			};
 			model = glm::translate(glm::mat4(1.0f), pos);
+			model = glm::rotate(model, t, {0, 1, 0});
 			res_loc = glGetUniformLocation(prog->program_id, "model");
 			glUniformMatrix4fv(res_loc, 1, GL_FALSE, &model[0][0]);
 			planets[i].draw();
@@ -188,7 +192,7 @@ void App::init(Simulation *sim)
 
 	glViewport(0, 0, width, height);
 
-	cam = {105, 120, 150};
+	cam = {125, 160, 150};
 	look_dir = glm::normalize(cam * -1.0f);
 
 	this->sim = sim;

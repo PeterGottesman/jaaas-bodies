@@ -19,6 +19,6 @@ private:
 	void init_mesh(void);
 
 public:
-	Planet(float radius = 1.0f);
+	Planet(bool simple, float radius = 1.0f);
 	void draw(void);
 };

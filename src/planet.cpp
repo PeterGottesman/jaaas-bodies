@@ -3,7 +3,7 @@
 #include "planet.hpp"
 #include <glm/gtc/noise.hpp>
 
-Planet::Planet(float radius) : radius(radius)
+Planet::Planet(bool simple, float radius) : radius(radius)
 {
 	// Initial verts/tris shamelessly stolen from
 	// https://schneide.blog/2016/07/15/generating-an-icosphere-in-c/
@@ -28,8 +28,9 @@ Planet::Planet(float radius) : radius(radius)
 	glBindVertexArray(vao);
 	glGenBuffers(16, vbo);
 
-	for (int i = 0; i < 3; i++)
-		subdivide();
+	if (!simple)
+		for (int i = 0; i < 4; i++)
+			subdivide();
 
 	init_mesh();
 }
@@ -37,6 +38,7 @@ Planet::Planet(float radius) : radius(radius)
 void Planet::subdivide()
 {
 	std::vector<glm::uvec3> tmptris;
+
 
 	for (auto t : tris)
 	{
@@ -67,16 +69,16 @@ void Planet::init_mesh()
 	for (auto&& v : verts)
 	{
 		glm::fvec3 noise = {
-			glm::simplex(2.0f*v) * 0.05 +
+			glm::simplex(2.0f * v) * 0.25 +
 			glm::simplex(v) * 0.15,
 
 			glm::simplex(2.0f * v) * 0.09,
 
 			glm::simplex(v) * 0.25 +
-			glm::simplex(2.0f * v) * 0.05,
+			glm::simplex(2.0f * v) * 0.25,
 		};
 
-		colors.push_back(glm::fvec3({0.7, 0.5, 0.3}) + noise * 0.5f);
+		colors.push_back(glm::fvec3({0.7, 0.5, 0.35}) + noise * 0.5f);
 
 		v += noise;
 		norms.push_back(glm::normalize(v));
