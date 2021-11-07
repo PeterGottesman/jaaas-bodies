@@ -1,27 +1,21 @@
 #pragma once
 
-struct vertex
-{
-	float x, y, z;
-};
-
-struct triangle
-{
-	int v1, v2, v3;
-};
+#include <vector>
+#include "app.hpp"
 
 class Planet
 {
 private:
-	struct vertex *verts;
-	struct triangle *tris;
+	std::vector<glm::fvec3> verts;
+	std::vector<glm::fvec3> colors;
+	std::vector<glm::fvec3> norms;
+	std::vector<glm::uvec3> tris;
+
 	float radius;
 	
-	unsigned int vao, vbo[3];
+	unsigned int vao, vbo[16];
 
 public:
 	Planet(float radius = 1.0f);
 	void draw(void);
-	struct vertex *get_verts() { return verts; }
-	struct triangle *get_tris() { return tris; }
 };
