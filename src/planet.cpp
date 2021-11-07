@@ -2,76 +2,94 @@
 #include "app.hpp"
 #include "planet.hpp"
 
+void Planet::subdivide()
+{
+	std::vector<glm::uvec3> tmptris;
+
+	for (auto t : tris)
+	{
+		// for each triangle, split into four tris
+		verts.push_back(glm::normalize(verts[t.x] + verts[t.y]));
+		verts.push_back(glm::normalize(verts[t.y] + verts[t.z]));
+		verts.push_back(glm::normalize(verts[t.x] + verts[t.z]));
+		unsigned int m2 = verts.size()-1;
+		unsigned int m1 = m2-1;
+		unsigned int m0 = m1-1;
+
+
+		tmptris.push_back({t.x, m0, m2});
+		tmptris.push_back({m0, t.y, m1});
+		tmptris.push_back({m2, m1, t.z});
+		tmptris.push_back({m0, m1, m2});
+	}
+
+	tris = tmptris;
+}
+
 Planet::Planet(float radius) : radius(radius)
 {
-	verts = new struct vertex[8] {
-		{-0.5, 0.5, -0.5},		// 0 top back left
-		{-0.5, 0.5, 0.5},		// 1 top front left
-		{0.5, 0.5, -0.5},		// 2 top back right
-		{0.5, 0.5, 0.5},		// 3 top front right
-		{-0.5, -0.5, -0.5},		// 4 bottom back left
-		{-0.5, -0.5, 0.5},		// 5 bottom front left
-		{0.5, -0.5, -0.5},		// 6 bottom back right
-		{0.5, -0.5, 0.5},		// 7 bottom front right
+	// Stolen shamelessly from
+	// https://schneide.blog/2016/07/15/generating-an-icosphere-in-c/
+	const float X=.525731112119133606f;
+	const float Z=.850650808352039932f;
+	const float N=0.f;
+
+	verts = {
+		{-X,N,Z}, {X,N,Z}, {-X,N,-Z}, {X,N,-Z},
+		{N,Z,X}, {N,Z,-X}, {N,-Z,X}, {N,-Z,-X},
+		{Z,X,N}, {-Z,X, N}, {Z,-X,N}, {-Z,-X, N}
 	};
 
-	struct vertex *colors = new struct vertex[8] {
-		{0, 0, 1},
-		{1, 0, 1},
-		{0, 1, 1},
-		{1, 0, 0},
-
-		{0, 1, 0},
-		{1, 1, 1},
-		{1, 1, 0},
-		{1, 1, 1},
-	};
-
-	tris = new struct triangle[12] {
-		// top
-		{0, 1, 2},
-		{2, 1, 3},
-
-		// bottom
-		{4, 5, 6},
-		{7, 6, 5},
-
-		// left 
-		{0, 4, 1},
-		{1, 4, 5},
-
-		// right 
-		{3, 7, 2},
-		{2, 7, 6},
-
-		// front
-		{1, 5, 3},
-		{3, 5, 7},
-
-		// back
-		{0, 4, 2},
-		{2, 4, 6},
+	tris = {
+		{0,4,1},{0,9,4},{9,5,4},{4,5,8},{4,8,1},
+		{8,10,1},{8,3,10},{5,3,8},{5,2,3},{2,7,3},
+		{7,10,3},{7,6,10},{7,11,6},{11,0,6},{0,1,6},
+		{6,1,10},{9,0,11},{9,11,2},{9,2,5},{7,2,11}
 	};
 
 	glGenVertexArrays(1, &vao);
 	glBindVertexArray(vao);
-	glEnableVertexAttribArray(0);
-	glGenBuffers(3, vbo);
+	glGenBuffers(16, vbo);
 
+	for (int i = 0; i < 3; i++)
+		subdivide();
+
+	init_mesh();
+}
+
+void Planet::init_mesh()
+{
+	// Clear generated fields
+	colors.clear();
+	norms.clear();
+
+	// Generate colors/norms
+	for (auto v : verts)
+	{
+		colors.push_back(v);
+		norms.push_back(glm::normalize(v));
+	}
+
+	glEnableVertexAttribArray(0);
 	glBindBuffer(GL_ARRAY_BUFFER, vbo[0]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24, verts, GL_STATIC_DRAW);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(verts[0]) * verts.size(), &verts[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(0, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
+	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[1]);
+	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(tris[0]) * tris.size(), &tris[0], GL_STATIC_DRAW);
+
 	glEnableVertexAttribArray(1);
-	glBindBuffer(GL_ARRAY_BUFFER, vbo[1]);
-	glBufferData(GL_ARRAY_BUFFER, sizeof(float) * 24, colors, GL_STATIC_DRAW);
+	glBindBuffer(GL_ARRAY_BUFFER, vbo[2]);
+	glBufferData(GL_ARRAY_BUFFER, sizeof(colors[0]) * colors.size(), &colors[0], GL_STATIC_DRAW);
 	glVertexAttribPointer(1, 3, GL_FLOAT, GL_FALSE, 0, 0);
 
-	glBindBuffer(GL_ELEMENT_ARRAY_BUFFER, vbo[2]);
-	glBufferData(GL_ELEMENT_ARRAY_BUFFER, sizeof(unsigned int) * 36, tris, GL_STATIC_DRAW);
+	// glEnableVertexAttribArray(2);
+	// glBindBuffer(GL_ARRAY_BUFFER, vbo[3]);
+	// glBufferData(GL_ARRAY_BUFFER, sizeof(norms[0]) * norms.size(), &norms, GL_STATIC_DRAW);
+	// glVertexAttribPointer(2, 3, GL_FLOAT, GL_FALSE, 0, 0);
 }
 
 void Planet::draw(void)
 {
-	glDrawElements(GL_TRIANGLES, 36, GL_UNSIGNED_INT, 0);
+	glDrawElements(GL_TRIANGLES, tris.size() * tris[0].length(), GL_UNSIGNED_INT, 0);
 }

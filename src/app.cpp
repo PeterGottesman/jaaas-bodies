@@ -68,7 +68,7 @@ void App::run()
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
 		glm::mat4 view = glm::lookAt(
-			glm::vec3(4,3,3), // camera
+			glm::vec3(4*cos(t),3,4*sin(t)), // camera
 			glm::vec3(0,0,0), // lookat
 			glm::vec3(0,1,0)  // up
 			);
@@ -83,7 +83,7 @@ void App::run()
 		glfwPollEvents();
 		glfwSwapBuffers(win);
 
-		t += 0.01;
+		t += 0.05;
 	}
 
 	glfwDestroyWindow(win);

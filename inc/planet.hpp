@@ -15,6 +15,9 @@ private:
 	
 	unsigned int vao, vbo[16];
 
+	void subdivide(void);
+	void init_mesh(void);
+
 public:
 	Planet(float radius = 1.0f);
 	void draw(void);
