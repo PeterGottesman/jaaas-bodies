@@ -131,14 +131,11 @@ void App::run()
 		glClearColor(0.05, 0, 0.1, 1);
 		glClear(GL_COLOR_BUFFER_BIT | GL_DEPTH_BUFFER_BIT);
 
-		cam += glm::fvec3{0.0010f, 0.0005f, 0.0f};
-
 		view = glm::lookAt(
 			cam,
 			cam + look_dir,
 			glm::vec3(0,1,0)  // up
 			);
-
 
 		res_loc = glGetUniformLocation(prog->program_id, "cam_dir");
 		glUniform3f(res_loc, look_dir.x, look_dir.y, look_dir.z);
