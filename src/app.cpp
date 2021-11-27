@@ -40,62 +40,90 @@ void App::keyhandler(GLFWwindow *win, int key, int scancode, int action, int mod
 			break;
 
 		case GLFW_KEY_R:
-			a->rotate_cam({1, 0, 0});
+			a->rotate_cam(DIR_UP);
 			break;
 		case GLFW_KEY_F:
-			a->rotate_cam({-1, 0, 0});
+			a->rotate_cam(DIR_DOWN);
 			break;
 
 		case GLFW_KEY_Q:
-			a->rotate_cam({0, 1, 0});
+			a->rotate_cam(DIR_LEFT);
 			break;
 		case GLFW_KEY_E:
-			a->rotate_cam({0, -1, 0});
+			a->rotate_cam(DIR_RIGHT);
 			break;
 
 		case GLFW_KEY_W:
-			a->move_cam({0, 0, 1});
+			a->move_cam(DIR_FRONT);
 			break;
 		case GLFW_KEY_A:
-			a->move_cam({-1, 0, 0});
+			a->move_cam(DIR_LEFT);
 			break;
 		case GLFW_KEY_S:
-			a->move_cam({0, 0, -1});
+			a->move_cam(DIR_BACK);
 			break;
 		case GLFW_KEY_D:
-			a->move_cam({1, 0, 0});
+			a->move_cam(DIR_RIGHT);
 			break;
 
 		case GLFW_KEY_G:
-			a->move_cam({0, -1, 0});
+			a->move_cam(DIR_UP);
 			break;
 		case GLFW_KEY_T:
-			a->move_cam({0, 1, 0});
+			a->move_cam(DIR_DOWN);
 			break;
 		default:
 			break;
 	}
 }
 
-void App::move_cam(glm::fvec3 dir)
+void App::move_cam(direction dir)
 {
-	if (dir.z != 0)
+	switch (dir)
 	{
-		cam += look_dir * dir.z;
-	}
-	else if (dir.x != 0)
-	{
-		cam += glm::cross(look_dir, {0.0f, 1.0f, 0.0f}) * dir.x;
-	}
-	else if (dir.y != 0)
-	{
-		cam += dir;
+		case DIR_UP:
+			cam.y += 1.0;
+			break;
+		case DIR_DOWN:
+			cam.y -= 1.0;
+			break;
+		case DIR_RIGHT:
+			cam += glm::cross(look_dir, {0.0f, 1.0f, 0.0f});
+			break;
+		case DIR_LEFT:
+			cam -= glm::cross(look_dir, {0.0f, 1.0f, 0.0f});
+			break;
+		case DIR_FRONT:
+			cam += look_dir;
+			break;
+		case DIR_BACK:
+			cam -= look_dir;
+			break;
 	}
 }
 
-void App::rotate_cam(glm::fvec3 axis)
+void App::rotate_cam(direction axis)
 {
-	look_dir = glm::rotate(look_dir, glm::radians(1.0f), axis);
+	glm::vec3 rot_axis;
+	switch (axis)
+	{
+		case DIR_UP:
+			rot_axis = glm::cross(look_dir, {0, 1, 0});
+			break;
+		case DIR_DOWN:
+			rot_axis = glm::cross(look_dir, {0, -1, 0});
+			break;
+		case DIR_LEFT:
+			rot_axis = {0, 1, 0};
+			break;
+		case DIR_RIGHT:
+			rot_axis = {0, -1, 0};
+			break;
+		default:
+			return;
+	}
+
+	look_dir = glm::rotate(look_dir, glm::radians(1.0f), rot_axis);
 }
 
 void App::run()
